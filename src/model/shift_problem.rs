@@ -80,3 +80,8 @@ pub struct DbShiftProblem{
   pub end_time          : NaiveTime,
 }
 
+#[derive(Serialize,Deserialize)]
+pub struct WriterAndShiftIds{
+  pub writer_id : Uuid,
+  pub shift_id  : Uuid
+}

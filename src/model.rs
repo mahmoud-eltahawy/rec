@@ -1,5 +1,7 @@
 pub mod shift_problem;
 pub mod spare_part;
+pub mod department;
+pub mod relations;
 pub mod employee;
 pub mod problem;
 pub mod machine;
