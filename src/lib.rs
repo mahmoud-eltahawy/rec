@@ -1,4 +1,5 @@
 pub mod timer;
+pub mod model;
 
 #[cfg(test)]
 mod tests {
