@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-#[derive(Serialize,Deserialize,Clone,Copy)]
+#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
 pub enum Table{
     Employee                = 1,
     Machine                 = 2,
@@ -35,7 +35,7 @@ impl From<i16> for Table{
         }
     }
 }
-#[derive(Serialize,Deserialize,Clone,Copy)]
+#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
 pub enum Cud {
     Create = 1,
     Update = 2,
@@ -62,7 +62,7 @@ pub struct DbCudVersion{
     pub cud                 : i16,
 }
 
-#[derive(Serialize,Deserialize,Clone,Copy)]
+#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
 pub struct CudVersion{
     pub version_number      : u64,
     pub target_id           : Uuid,

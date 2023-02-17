@@ -1,21 +1,20 @@
 use serde::{Serialize, Deserialize};
-use uuid::Uuid;
 
 use super::{
-    employee::Employee,
-    problem::Probelm,
-    machine::Machine,
-    spare_part::SparePart
+    employee::ClientEmployee,
+    problem::ClientProblem,
+    machine::ClientMachine,
+    spare_part::ClientSparePart
 };
 
 #[derive(Serialize,Deserialize,Clone,Debug)]
 pub struct Name{
-  pub id : Option<Uuid>,
+  pub id : String,
   pub name : String
 }
 
 impl Name{
-  pub fn build_employee(employee : &Employee) -> Name{
+  pub fn build_employee(employee : ClientEmployee) -> Name{
     Name {
       id: employee.id,
       name: format!("{} {} {}",
@@ -26,23 +25,23 @@ impl Name{
     }
   }
 
-  pub fn build_problem(problem : &Probelm) -> Name{
+  pub fn build_problem(problem : ClientProblem) -> Name{
     Name {
-      id: Some(problem.id),
+      id: problem.id,
       name: problem.title.clone()
     }
   }
 
-  pub fn build_machine(machine : &Machine) -> Name{
+  pub fn build_machine(machine : ClientMachine) -> Name{
     Name {
-      id: Some(machine.id),
+      id: machine.id,
       name: machine.name.clone()
     }
   }
 
-  pub fn build_spare_part(spare_part : &SparePart) -> Name{
+  pub fn build_spare_part(spare_part : ClientSparePart) -> Name{
     Name {
-      id: Some(spare_part.id),
+      id: spare_part.id,
       name: spare_part.name.clone()
     }
   }
