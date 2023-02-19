@@ -87,12 +87,19 @@ fn get_seconds_and_nanos(milis : u32) -> (u32,u32) {
   (milis as u32 / 1000,nanos as u32)
 }
 
-pub fn get_shift_borders(order : ShiftOrder) -> (Option<NaiveTime>,Option<NaiveTime>){
+pub fn get_shift_borders(order : ShiftOrder) -> Option<(NaiveTime,NaiveTime)>{
   let shift_begin_milis = order as i64 * SHIFT_TIME;
   let (bs,bn) = get_seconds_and_nanos(shift_begin_milis as u32);
   let shift_begin = NaiveTime::from_num_seconds_from_midnight_opt(bs,bn);
   let (es,en) = get_seconds_and_nanos(shift_begin_milis as u32 + SHIFT_TIME as u32);
   let shift_end = NaiveTime::from_num_seconds_from_midnight_opt(es,en);
-
-  (shift_begin,shift_end)
+  let shift_begin = match shift_begin {
+    Some(sb) => sb,
+    None     => return None
+  };
+  let shift_end = match shift_end {
+    Some(se) => se,
+    None     => return None
+  };
+  Some((shift_begin,shift_end))
 }

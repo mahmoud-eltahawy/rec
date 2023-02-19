@@ -22,7 +22,7 @@ pub struct ClientEmployee{
     pub first_name      : String,
     pub middle_name     : String,
     pub last_name       : String,
-    pub card_id         : i16,
+    pub card_id         : i64,
     pub password        : String
 }
 
@@ -36,7 +36,7 @@ impl ClientEmployee{
         first_name,
         middle_name,
         last_name,
-        card_id,
+        card_id : card_id as i64,
         password
     }
   }

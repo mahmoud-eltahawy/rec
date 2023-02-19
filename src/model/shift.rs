@@ -26,6 +26,13 @@ pub struct Shift{
     pub shift_order   : ShiftOrder,
 }
 
+#[derive(Serialize,Deserialize,FromRow)]
+pub struct ClientDbShift{
+    pub id            : String,
+    pub shift_date    : String,
+    pub shift_order   : String,
+}
+
 impl Shift {
     pub fn new(s : DbShift) -> Option<Self>{
         let shift_order = match s.shift_order {
@@ -39,5 +46,38 @@ impl Shift {
             shift_date: s.shift_date,
             shift_order
         })
+    }
+    pub fn get(s : ClientDbShift) -> Option<Self>{
+        let ClientDbShift{id,shift_order,shift_date} = s;
+        let id = match Uuid::parse_str(&id) {
+            Ok(id) => id,
+            Err(_) => return None
+        };
+        let shift_date = match serde_json::from_str(&shift_date) {
+            Ok(date) => date,
+            Err(_)   => return None
+        };
+        let shift_order = match serde_json::from_str(&shift_order) {
+            Ok(date) => date,
+            Err(_)   => return None
+        };
+        Some(Shift {
+            id,
+            shift_date,
+            shift_order
+        })
+    }
+}
+
+impl ClientDbShift {
+    pub fn new(s : Shift) -> Self {
+        let Shift { id, shift_date, shift_order } = s;
+        let shift_order = serde_json::json!(shift_order).to_string();
+        let shift_date  = serde_json::json!(shift_date).to_string();
+        ClientDbShift {
+            id: id.to_string(),
+            shift_order,
+            shift_date
+        }
     }
 }
