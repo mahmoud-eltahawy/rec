@@ -14,7 +14,8 @@ pub enum Table{
     ShiftProblemSparePart   = 9,
     ShiftProblemNote        = 10,
     ShiftNote               = 11,
-    Undefined               = 0
+    DepartmentShift         = 12,
+    Undefined               = 0,
 }
 
 impl From<i16> for Table{
@@ -31,6 +32,7 @@ impl From<i16> for Table{
             9  => Table::ShiftProblemSparePart,
             10 => Table::ShiftProblemNote,
             11 => Table::ShiftNote,
+            12 => Table::DepartmentShift,
             _ => Table::Undefined
         }
     }

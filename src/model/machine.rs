@@ -1,15 +1,14 @@
 use serde::{Serialize, Deserialize};
-use sqlx::FromRow;
 use uuid::Uuid;
 
 
-#[derive(Serialize,Deserialize,FromRow)]
+#[derive(Serialize,Deserialize)]
 pub struct Machine{
     pub id          : Uuid,
     pub name        : String
 }
 
-#[derive(Serialize,Deserialize,FromRow)]
+#[derive(Serialize,Deserialize,Clone)]
 pub struct ClientMachine{
     pub id          : String,
     pub name        : String

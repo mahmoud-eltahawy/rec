@@ -27,6 +27,20 @@ pub struct Shift{
 }
 
 #[derive(Serialize,Deserialize,FromRow)]
+pub struct DepartmentShift{
+    pub id              : Uuid,
+    pub shift_id        : Uuid,
+    pub department_id   : Uuid,
+}
+
+#[derive(Serialize,Deserialize,Debug)]
+pub struct ClientDepartmentShift{
+    pub id              : String,
+    pub shift_id        : String,
+    pub department_id   : String,
+}
+
+#[derive(Serialize,Deserialize,FromRow)]
 pub struct ClientDbShift{
     pub id            : String,
     pub shift_date    : String,
@@ -78,6 +92,17 @@ impl ClientDbShift {
             id: id.to_string(),
             shift_order,
             shift_date
+        }
+    }
+}
+
+impl ClientDepartmentShift {
+    pub fn new(shift : DepartmentShift) -> Self {
+        let DepartmentShift { id, shift_id, department_id } = shift;
+        ClientDepartmentShift {
+            id              : id.to_string(),
+            shift_id        : shift_id.to_string(),
+            department_id   : department_id.to_string()
         }
     }
 }

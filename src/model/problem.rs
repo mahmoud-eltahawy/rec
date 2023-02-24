@@ -1,9 +1,8 @@
 use serde::{Serialize, Deserialize};
-use sqlx::FromRow;
 use uuid::Uuid;
 
 
-#[derive(Serialize,Deserialize,FromRow)]
+#[derive(Serialize,Deserialize)]
 pub struct Probelm{
     pub id                      : Uuid,
     pub writer_id               : Uuid,
@@ -12,7 +11,7 @@ pub struct Probelm{
     pub description             : String
 }
 
-#[derive(Serialize,Deserialize,FromRow)]
+#[derive(Serialize,Deserialize)]
 pub struct ClientProblem{
     pub id                      : String,
     pub writer_id               : String,
