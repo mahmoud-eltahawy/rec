@@ -3,22 +3,16 @@ use uuid::Uuid;
 
 
 #[derive(Serialize,Deserialize)]
-pub struct Machine{
-    pub id          : Uuid,
+pub struct Machine<T: ToString>{
+    pub id          : T,
     pub name        : String
 }
 
-#[derive(Serialize,Deserialize,Clone)]
-pub struct ClientMachine{
-    pub id          : String,
-    pub name        : String
-}
-
-impl ClientMachine {
-    pub fn new(machine : Machine) -> Self{
-        ClientMachine {
-            id: machine.id.to_string(),
-            name: machine.name
+impl Machine<Uuid> {
+    pub fn string_to_client(self) -> Machine<String>{
+        Machine {
+            id: self.id.to_string(),
+            name: self.name
         }
     }
 }

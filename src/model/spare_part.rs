@@ -2,25 +2,17 @@ use serde::{Serialize, Deserialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-
 #[derive(Serialize,Deserialize,FromRow)]
-pub struct SparePart{
-    pub id         : Uuid,
-    pub name       : String,
+pub struct SparePart<T: ToString>{
+  pub id         : T,
+  pub name       : String,
 }
 
-
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct ClientSparePart{
-    pub id         : String,
-    pub name       : String,
-}
-
-impl ClientSparePart{
-    pub fn new(part : SparePart) -> Self{
-        ClientSparePart {
-            id: part.id.to_string(),
-            name: part.name
-        }
+impl SparePart::<Uuid>{
+  pub fn string_to_client(self) -> SparePart<String>{
+    SparePart {
+      id: self.id.to_string(),
+      name: self.name
     }
+  }
 }

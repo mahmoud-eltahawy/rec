@@ -3,29 +3,20 @@ use uuid::Uuid;
 
 
 #[derive(Serialize,Deserialize)]
-pub struct Probelm{
-    pub id                      : Uuid,
-    pub writer_id               : Uuid,
-    pub department_id           : Uuid,
+pub struct Problem<T: ToString>{
+    pub id                      : T,
+    pub writer_id               : T,
+    pub department_id           : T,
     pub title                   : String,
     pub description             : String
 }
 
-#[derive(Serialize,Deserialize)]
-pub struct ClientProblem{
-    pub id                      : String,
-    pub writer_id               : String,
-    pub department_id           : String,
-    pub title                   : String,
-    pub description             : String
-}
-
-impl ClientProblem {
-    pub fn new(problem : Probelm) -> Self{
-        let Probelm{id,writer_id,department_id,title,description} = problem;
+impl Problem::<Uuid> {
+    pub fn string_to_client(self) -> Problem<String>{
+        let Problem{id,writer_id,department_id,title,description} = self;
         let id = id.to_string();
         let writer_id = writer_id.to_string();
         let department_id = department_id.to_string();
-        ClientProblem { id, writer_id, department_id , title, description }
+        Problem { id, writer_id, department_id , title, description }
     }
 }

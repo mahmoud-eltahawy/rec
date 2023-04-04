@@ -3,24 +3,16 @@ use uuid::Uuid;
 use sqlx::FromRow;
 
 #[derive(Serialize,Deserialize,Clone,FromRow,Debug)]
-pub struct Department{
-   pub id            : Uuid,
-   pub boss_id       : Option<Uuid>,
-   pub department_id : Option<Uuid>,
+pub struct Department<T: ToString>{
+   pub id            : T,
+   pub boss_id       : Option<T>,
+   pub department_id : Option<T>,
    pub name          : String,
 }
 
-#[derive(Serialize,Deserialize,Clone,FromRow,Debug)]
-pub struct ClientDepartment{
-   pub id            : String,
-   pub boss_id       : Option<String>,
-   pub department_id : Option<String>,
-   pub name          : String,
-}
-
-impl ClientDepartment {
-   pub fn new(dep : Department) -> Self{
-      let Department{id,boss_id,department_id,name} = dep;
+impl Department::<Uuid> {
+   pub fn string_to_client(self) -> Department<String>{
+      let Department{id,boss_id,department_id,name} = self;
       let id = id.to_string();
       let boss_id = match boss_id {
          Some(uuid) => Some(uuid.to_string()),
@@ -30,6 +22,6 @@ impl ClientDepartment {
          Some(uuid) => Some(uuid.to_string()),
          None       => None
       };
-      ClientDepartment { id, boss_id, department_id, name }
+      Department { id, boss_id, department_id, name }
    }
 }

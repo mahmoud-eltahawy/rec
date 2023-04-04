@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use super::note::{Note, ClientNote};
+use super::note::Note;
 
 #[derive(Serialize,Deserialize,FromRow,Clone)]
 pub struct MinimamlShiftProblem{
@@ -16,7 +16,7 @@ pub struct MinimamlShiftProblem{
   pub end_time          : NaiveTime,
   pub problems_ids      : Vec<Uuid>,
   pub spare_parts_ids   : Option<Vec<Uuid>>,
-  pub note              : Option<Note>
+  pub note              : Option<Note<Uuid>>
 }
 
 #[derive(Serialize,Deserialize,FromRow)]
@@ -63,13 +63,13 @@ impl MinimamlShiftProblem {
       note
     }
   }
-  pub fn destruct(self) -> (ShiftProblem,Vec<Uuid>,Option<Vec<Uuid>>,Option<Note>){
+  pub fn destruct(self) -> (ShiftProblem,Vec<Uuid>,Option<Vec<Uuid>>,Option<Note<Uuid>>){
     let MinimamlShiftProblem{ id, shift_id, writer_id, maintainer_id,
             machine_id, begin_time, end_time, problems_ids, spare_parts_ids, note } = self;
     let shift_problem = ShiftProblem{id,machine_id,maintainer_id,shift_id,writer_id,begin_time,end_time};
     (shift_problem,problems_ids,spare_parts_ids,note)
   }
-  pub fn construct(pieaces : (ShiftProblem,Vec<Uuid>,Option<Vec<Uuid>>,Option<Note>)) -> Self{
+  pub fn construct(pieaces : (ShiftProblem,Vec<Uuid>,Option<Vec<Uuid>>,Option<Note<Uuid>>)) -> Self{
     let (shift_problem,problems_ids,spare_parts_ids,note) = pieaces;
     let ShiftProblem{id,machine_id,maintainer_id,shift_id,writer_id,begin_time,end_time} = shift_problem;
     MinimamlShiftProblem{ id, shift_id, writer_id, maintainer_id,
@@ -112,7 +112,7 @@ pub struct ClientMinimamlShiftProblem{
   pub end_time          : String,
   pub problems_ids      : Vec<String>,
   pub spare_parts_ids   : Option<Vec<String>>,
-  pub note              : Option<ClientNote>
+  pub note              : Option<Note<String>>
 }
 
 impl ClientMinimamlShiftProblem{
@@ -132,7 +132,7 @@ impl ClientMinimamlShiftProblem{
       None      => None
     };
     let note = match note {
-      Some(Note{id,content})  => Some(ClientNote{id : id.to_string(), content }),
+      Some(Note{id,content})  => Some(Note{id : id.to_string(), content }),
       None                    => None
     };
 
@@ -149,7 +149,7 @@ impl ClientMinimamlShiftProblem{
       note
     }
   }
-  pub fn construct(pieaces : (ClientShiftProblem,Vec<String>,Option<Vec<String>>,Option<ClientNote>)) -> Self{
+  pub fn construct(pieaces : (ClientShiftProblem,Vec<String>,Option<Vec<String>>,Option<Note<String>>)) -> Self{
     let (problem,problems_ids,spare_parts_ids,note) = pieaces;
     let ClientShiftProblem{id,shift_id,writer_id,maintainer_id,machine_id,begin_time,end_time} = problem;
 

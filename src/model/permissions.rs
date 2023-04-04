@@ -2,7 +2,7 @@
 use uuid::Uuid;
 
 #[derive(PartialEq,Serialize,Deserialize,Debug)]
-pub enum PermissionsNames {
+pub enum PermissionName {
   WriteDepartmentProblem,
   ReadDepartmentProblems,
   ModifyDepartmentProblems,
@@ -17,8 +17,8 @@ pub enum PermissionsNames {
 }
 
 #[derive(Serialize,Deserialize,Clone,Debug)]
-pub struct Permissions {
-  pub id                                                    :  Uuid,
+pub struct Permissions<T:ToString>{
+  pub id                                                    :  T,
   pub write_department_problem                              :  bool,
   pub read_department_problems                              :  bool,
   pub modify_department_problems                            :  bool,
@@ -32,7 +32,37 @@ pub struct Permissions {
   pub access_history_employees                              :  bool,
 }
 
-impl Permissions {
+impl Permissions::<Uuid> {
+  pub fn string_to_client(self) -> Permissions<String>{
+    let Permissions{
+      id,
+      access_history_all_departments_department_problems,
+      access_history_all_departments_problems,
+      access_history_department_department_problems,
+      access_history_department_problems,
+      access_history_employees,
+      access_history_machines,
+      access_history_spare_parts,
+      define_problem,
+      modify_department_problems,
+      read_department_problems,
+      write_department_problem,
+    } = self;
+    Permissions {
+      id: id.to_string(),
+      access_history_all_departments_department_problems,
+      access_history_all_departments_problems,
+      access_history_department_department_problems,
+      access_history_department_problems,
+      access_history_employees,
+      access_history_machines,
+      access_history_spare_parts,
+      define_problem,
+      modify_department_problems,
+      read_department_problems,
+      write_department_problem,
+    }
+  }
   pub fn default(id : Uuid) -> Self{
       Permissions{
         id,
@@ -51,108 +81,92 @@ impl Permissions {
   }
 }
 
-#[derive(Serialize,Deserialize)]
-pub struct ClientPermissions {
-  pub id                                                    :  String,
-  pub write_department_problem                              :  bool,
-  pub read_department_problems                              :  bool,
-  pub modify_department_problems                            :  bool,
-  pub define_problem                                        :  bool,
-  pub access_history_department_problems                    :  bool,
-  pub access_history_all_departments_problems               :  bool,
-  pub access_history_department_department_problems         :  bool,
-  pub access_history_all_departments_department_problems    :  bool,
-  pub access_history_machines                               :  bool,
-  pub access_history_spare_parts                            :  bool,
-  pub access_history_employees                              :  bool,
-}
-
-impl ClientPermissions {
-  pub fn list(&self) -> (Vec<PermissionsNames>,Vec<PermissionsNames>){
+impl Permissions::<String> {
+  pub fn list(&self) -> (Vec<PermissionName>,Vec<PermissionName>){
     let mut allowed   = Vec::new();
     let mut forbidden = Vec::new();
     if self.write_department_problem {
-      allowed.push(PermissionsNames::WriteDepartmentProblem);
+      allowed.push(PermissionName::WriteDepartmentProblem);
     } else {
-      forbidden.push(PermissionsNames::WriteDepartmentProblem)
+      forbidden.push(PermissionName::WriteDepartmentProblem)
     }
     if self.read_department_problems {
-      allowed.push(PermissionsNames::ReadDepartmentProblems);
+      allowed.push(PermissionName::ReadDepartmentProblems);
     } else {
-      forbidden.push(PermissionsNames::ReadDepartmentProblems)
+      forbidden.push(PermissionName::ReadDepartmentProblems)
     }
     if self.modify_department_problems {
-      allowed.push(PermissionsNames::ModifyDepartmentProblems);
+      allowed.push(PermissionName::ModifyDepartmentProblems);
     } else {
-      forbidden.push(PermissionsNames::ModifyDepartmentProblems)
+      forbidden.push(PermissionName::ModifyDepartmentProblems)
     }
     if self.define_problem {
-      allowed.push(PermissionsNames::DefineProblem);
+      allowed.push(PermissionName::DefineProblem);
     } else {
-      forbidden.push(PermissionsNames::DefineProblem)
+      forbidden.push(PermissionName::DefineProblem)
     }
     if self.access_history_department_problems {
-      allowed.push(PermissionsNames::AccessHistoryDepartmentProblems);
+      allowed.push(PermissionName::AccessHistoryDepartmentProblems);
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryDepartmentProblems)
+      forbidden.push(PermissionName::AccessHistoryDepartmentProblems)
     }
     if self.access_history_all_departments_problems {
-      allowed.push(PermissionsNames::AccessHistoryAllDepartmentsProblems);
+      allowed.push(PermissionName::AccessHistoryAllDepartmentsProblems);
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryAllDepartmentsProblems)
+      forbidden.push(PermissionName::AccessHistoryAllDepartmentsProblems)
     }
     if self.access_history_department_department_problems {
-      allowed.push(PermissionsNames::AccessHistoryDepartmentDepartmentProblems)
+      allowed.push(PermissionName::AccessHistoryDepartmentDepartmentProblems)
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryDepartmentDepartmentProblems)
+      forbidden.push(PermissionName::AccessHistoryDepartmentDepartmentProblems)
     }
     if self.access_history_all_departments_department_problems {
-      allowed.push(PermissionsNames::AccessHistoryAllDepartmentsDepartmentProblems)
+      allowed.push(PermissionName::AccessHistoryAllDepartmentsDepartmentProblems)
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryAllDepartmentsDepartmentProblems)
+      forbidden.push(PermissionName::AccessHistoryAllDepartmentsDepartmentProblems)
     }
     if self.access_history_machines {
-      allowed.push(PermissionsNames::AccessHistoryMachines)
+      allowed.push(PermissionName::AccessHistoryMachines)
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryMachines)
+      forbidden.push(PermissionName::AccessHistoryMachines)
     }
     if self.access_history_spare_parts {
-      allowed.push(PermissionsNames::AccessHistorySpareParts)
+      allowed.push(PermissionName::AccessHistorySpareParts)
     } else {
-      forbidden.push(PermissionsNames::AccessHistorySpareParts)
+      forbidden.push(PermissionName::AccessHistorySpareParts)
     }
     if self.access_history_employees {
-      allowed.push(PermissionsNames::AccessHistoryEmployees)
+      allowed.push(PermissionName::AccessHistoryEmployees)
     } else {
-      forbidden.push(PermissionsNames::AccessHistoryEmployees)
+      forbidden.push(PermissionName::AccessHistoryEmployees)
     }
     (allowed,forbidden)
   }
 
-  pub fn from_list(id : String, allowed : Vec<PermissionsNames>) -> Self {
+  pub fn from_list(id : String, allowed : Vec<PermissionName>) -> Self {
     let write_department_problem                           = allowed
-      .contains(&PermissionsNames::WriteDepartmentProblem);
+      .contains(&PermissionName::WriteDepartmentProblem);
     let read_department_problems                           = allowed
-      .contains(&PermissionsNames::ReadDepartmentProblems);
+      .contains(&PermissionName::ReadDepartmentProblems);
     let modify_department_problems                         = allowed
-      .contains(&PermissionsNames::ModifyDepartmentProblems);
+      .contains(&PermissionName::ModifyDepartmentProblems);
     let define_problem                                     = allowed
-      .contains(&PermissionsNames::DefineProblem);
+      .contains(&PermissionName::DefineProblem);
     let access_history_department_problems                 = allowed
-      .contains(&PermissionsNames::AccessHistoryDepartmentProblems);
+      .contains(&PermissionName::AccessHistoryDepartmentProblems);
     let access_history_all_departments_problems            = allowed
-      .contains(&PermissionsNames::AccessHistoryAllDepartmentsProblems);
+      .contains(&PermissionName::AccessHistoryAllDepartmentsProblems);
     let access_history_department_department_problems      = allowed
-      .contains(&PermissionsNames::AccessHistoryDepartmentDepartmentProblems);
+      .contains(&PermissionName::AccessHistoryDepartmentDepartmentProblems);
     let access_history_all_departments_department_problems = allowed
-      .contains(&PermissionsNames::AccessHistoryAllDepartmentsDepartmentProblems);
+      .contains(&PermissionName::AccessHistoryAllDepartmentsDepartmentProblems);
     let access_history_machines                            = allowed
-      .contains(&PermissionsNames::AccessHistoryMachines);
+      .contains(&PermissionName::AccessHistoryMachines);
     let access_history_spare_parts                         = allowed
-      .contains(&PermissionsNames::AccessHistorySpareParts);
+      .contains(&PermissionName::AccessHistorySpareParts);
     let access_history_employees                           = allowed
-      .contains(&PermissionsNames::AccessHistoryEmployees);
-    return ClientPermissions {
+      .contains(&PermissionName::AccessHistoryEmployees);
+    return Permissions {
       id,
       write_department_problem,
       read_department_problems,
