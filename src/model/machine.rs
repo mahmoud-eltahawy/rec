@@ -1,18 +1,21 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::{TableResponse, Wrapable};
 
-#[derive(Serialize,Deserialize)]
-pub struct Machine<T: ToString>{
-    pub id          : T,
-    pub name        : String
+#[derive(Serialize, Deserialize)]
+pub struct Machine {
+    pub id: Uuid,
+    pub name: String,
 }
 
-impl Machine<Uuid> {
-    pub fn string_to_client(self) -> Machine<String>{
-        Machine {
-            id: self.id.to_string(),
-            name: self.name
-        }
+impl Wrapable for Machine {
+    fn wrap(self) -> TableResponse {
+        TableResponse::Machine(self)
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum UpdateMachine {
+    UpdateName(Uuid, String),
 }

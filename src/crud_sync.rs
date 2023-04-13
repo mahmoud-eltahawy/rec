@@ -1,91 +1,113 @@
-use serde::{Serialize, Deserialize};
+use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
-pub enum Table{
-    Employee                = 1,
-    Machine                 = 2,
-    Department              = 3,
-    SparePart               = 4,
-    Problem                 = 5,
-    Shift                   = 6,
-    ShiftProblem            = 7,
-    ShiftProblemProblem     = 8,
-    ShiftProblemSparePart   = 9,
-    ShiftProblemNote        = 10,
-    ShiftNote               = 11,
-    DepartmentShift         = 12,
-    Permissions             = 13,
-    Undefined               = 0,
+use crate::model::Update;
+
+const EMPLOYEE: &str = "EMPLOYEE";
+const MACHINE: &str = "MACHINE";
+const DEPARTMENT: &str = "DEPARTMENT";
+const SPARE_PART: &str = "SPARE_PART";
+const PROBLEM: &str = "PROBLEM";
+const SHIFT: &str = "SHIFT";
+const DEPARTMENT_SHIFT: &str = "DEPARTMENT_SHIFT";
+const SHIFT_PROBLEM: &str = "SHIFT_PROBLEM";
+
+const CREATE: &str = "CREATE";
+const DELETE: &str = "DELETE";
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+pub enum Table {
+    Employee,
+    Machine,
+    Department,
+    SparePart,
+    Problem,
+    Shift,
+    ShiftProblem,
+    DepartmentShift,
 }
 
-impl From<i16> for Table{
-    fn from(value: i16) -> Self{
-        match value {
-            1  => Table::Employee,
-            2  => Table::Machine,
-            3  => Table::Department,
-            4  => Table::SparePart,
-            5  => Table::Problem,
-            6  => Table::Shift,
-            7  => Table::ShiftProblem,
-            8  => Table::ShiftProblemProblem,
-            9  => Table::ShiftProblemSparePart,
-            10 => Table::ShiftProblemNote,
-            11 => Table::ShiftNote,
-            12 => Table::DepartmentShift,
-            13 => Table::Permissions,
-            _ => Table::Undefined
+impl Table {
+    pub fn stringify(&self) -> String {
+        match self {
+            Table::Employee => EMPLOYEE.to_string(),
+            Table::Machine => MACHINE.to_string(),
+            Table::Department => DEPARTMENT.to_string(),
+            Table::SparePart => SPARE_PART.to_string(),
+            Table::Problem => PROBLEM.to_string(),
+            Table::Shift => SHIFT.to_string(),
+            Table::ShiftProblem => SHIFT_PROBLEM.to_string(),
+            Table::DepartmentShift => DEPARTMENT_SHIFT.to_string(),
         }
     }
 }
-#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
-pub enum Cud {
-    Create = 1,
-    Update = 2,
-    Delete = 3,
-    Undefined = 0
-}
+impl TryFrom<String> for Table {
+    type Error = String;
 
-impl From<i16> for Cud{
-    fn from(value: i16) -> Self{
-        match value {
-            1  => Cud::Create,
-            2  => Cud::Update,
-            3  => Cud::Delete,
-            _ => Cud::Undefined
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            EMPLOYEE => Ok(Table::Employee),
+            MACHINE => Ok(Table::Machine),
+            DEPARTMENT => Ok(Table::Department),
+            SPARE_PART => Ok(Table::SparePart),
+            PROBLEM => Ok(Table::Problem),
+            SHIFT => Ok(Table::Shift),
+            SHIFT_PROBLEM => Ok(Table::ShiftProblem),
+            DEPARTMENT_SHIFT => Ok(Table::DepartmentShift),
+            _ => Err("Undefinded table".to_string()),
         }
     }
 }
 
-pub struct DbCudVersion{
-    pub version_number      : i64,
-    pub target_id           : Uuid,
-    pub other_target_id     : Option<Uuid>,
-    pub target_table        : i16,
-    pub cud                 : i16,
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+pub enum Cd {
+    Create,
+    Delete,
 }
 
-#[derive(Serialize,Deserialize,Clone,Copy,Debug)]
-pub struct CudVersion{
-    pub version_number      : u64,
-    pub target_id           : Uuid,
-    pub other_target_id     : Option<Uuid>,
-    pub target_table        : Table,
-    pub cud                 : Cud,
-}
-
-impl CudVersion{
-    pub fn get(v : DbCudVersion) -> Self{
-        let DbCudVersion{cud,other_target_id,target_id,target_table,version_number} = v;
-        let target_table : Table = target_table.into();
-        let cud          : Cud = cud.into();
-        CudVersion {
-            version_number : version_number as u64,
-            target_id,
-            other_target_id,
-            target_table,
-            cud
+impl Cd {
+    pub fn stringify(&self) -> Option<String> {
+        match self {
+            Cd::Create => Some(CREATE.to_string()),
+            Cd::Delete => Some(DELETE.to_string()),
         }
     }
+}
+
+impl TryFrom<String> for Cd {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            CREATE => Ok(Cd::Create),
+            DELETE => Ok(Cd::Delete),
+            _ => Err("undefined sql operation".to_string()),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+pub struct CdVersion {
+    pub version_number: u64,
+    pub updater_id: Uuid,
+    pub time_stamp: NaiveDateTime,
+    pub target_id: Uuid,
+    pub target_table: Table,
+    pub cd: Cd,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UpdateVersion {
+    pub version_number: u64,
+    pub target_id: Uuid,
+    pub updater_id: Uuid,
+    pub time_stamp: NaiveDateTime,
+    pub json: Update,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum Version {
+    Cd(CdVersion),
+    Update(UpdateVersion),
 }

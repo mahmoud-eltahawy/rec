@@ -1,108 +1,72 @@
 use chrono::NaiveDate;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use crate::timer::ShiftOrder;
+use super::{
+    note::{Note, ShiftNote},
+    TableResponse, Wrapable,
+};
 
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct DbShift{
-    pub id            : Uuid,
-    pub shift_date    : NaiveDate,
-    pub shift_order   : i16,
+const FIRST_SHIFT: &str = "FIRST";
+const SECOND_SHIFT: &str = "SECOND";
+const THIRD_SHIFT: &str = "THIRD";
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum ShiftOrder {
+    FIRST,
+    SECOND,
+    THIRD,
 }
 
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct DateOrder{
-    pub date    : NaiveDate,
-    pub order   : i16,
-}
-
-
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct Shift{
-    pub id            : Uuid,
-    pub shift_date    : NaiveDate,
-    pub shift_order   : ShiftOrder,
-}
-
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct DepartmentShift{
-    pub id              : Uuid,
-    pub shift_id        : Uuid,
-    pub department_id   : Uuid,
-}
-
-#[derive(Serialize,Deserialize,Debug)]
-pub struct ClientDepartmentShift{
-    pub id              : String,
-    pub shift_id        : String,
-    pub department_id   : String,
-}
-
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct ClientDbShift{
-    pub id            : String,
-    pub shift_date    : String,
-    pub shift_order   : String,
-}
-
-impl Shift {
-    pub fn new(s : DbShift) -> Option<Self>{
-        let shift_order = match s.shift_order {
-            1 => ShiftOrder::FIRST,
-            2 => ShiftOrder::SECOND,
-            3 => ShiftOrder::THIRD,
-            _ => return None
-        };
-        Some(Shift {
-            id: s.id,
-            shift_date: s.shift_date,
-            shift_order
-        })
-    }
-    pub fn get(s : ClientDbShift) -> Option<Self>{
-        let ClientDbShift{id,shift_order,shift_date} = s;
-        let id = match Uuid::parse_str(&id) {
-            Ok(id) => id,
-            Err(_) => return None
-        };
-        let shift_date = match serde_json::from_str(&shift_date) {
-            Ok(date) => date,
-            Err(_)   => return None
-        };
-        let shift_order = match serde_json::from_str(&shift_order) {
-            Ok(date) => date,
-            Err(_)   => return None
-        };
-        Some(Shift {
-            id,
-            shift_date,
-            shift_order
-        })
-    }
-}
-
-impl ClientDbShift {
-    pub fn new(s : Shift) -> Self {
-        let Shift { id, shift_date, shift_order } = s;
-        let shift_order = serde_json::json!(shift_order).to_string();
-        let shift_date  = serde_json::json!(shift_date).to_string();
-        ClientDbShift {
-            id: id.to_string(),
-            shift_order,
-            shift_date
+impl ShiftOrder {
+    pub fn stringify(&self) -> String {
+        match self {
+            ShiftOrder::FIRST => FIRST_SHIFT.to_string(),
+            ShiftOrder::SECOND => SECOND_SHIFT.to_string(),
+            ShiftOrder::THIRD => THIRD_SHIFT.to_string(),
         }
     }
 }
 
-impl ClientDepartmentShift {
-    pub fn new(shift : DepartmentShift) -> Self {
-        let DepartmentShift { id, shift_id, department_id } = shift;
-        ClientDepartmentShift {
-            id              : id.to_string(),
-            shift_id        : shift_id.to_string(),
-            department_id   : department_id.to_string()
+impl TryFrom<String> for ShiftOrder {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            FIRST_SHIFT => Ok(ShiftOrder::FIRST),
+            SECOND_SHIFT => Ok(ShiftOrder::SECOND),
+            THIRD_SHIFT => Ok(ShiftOrder::THIRD),
+            _ => Err("undefined shift".to_string()),
         }
     }
+}
+
+#[derive(Serialize, Deserialize, FromRow)]
+pub struct Shift {
+    pub id: Uuid,
+    pub shift_date: NaiveDate,
+    pub shift_order: ShiftOrder,
+}
+
+#[derive(Serialize, Deserialize, FromRow)]
+pub struct DepartmentShift {
+    pub id: Uuid,
+    pub shift_id: Uuid,
+    pub department_id: Uuid,
+}
+
+impl Wrapable for DepartmentShift {
+    fn wrap(self) -> TableResponse {
+        TableResponse::DepartmentShift(self)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum UpdateDepartmentShift {
+    SaveShiftEmployee(Uuid, Uuid),
+    DeleteShiftEmployee(Uuid, Uuid),
+    SaveNote(ShiftNote),
+    DeleteNote(Uuid, Uuid),
+    UpdateNote(Note),
 }

@@ -1,27 +1,25 @@
-use serde::{Serialize, Deserialize};
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
-#[derive(Serialize,Deserialize,Clone,FromRow,Debug)]
-pub struct Department<T: ToString>{
-   pub id            : T,
-   pub boss_id       : Option<T>,
-   pub department_id : Option<T>,
-   pub name          : String,
+use super::{TableResponse, Wrapable};
+
+#[derive(Serialize, Deserialize, Clone, FromRow, Debug)]
+pub struct Department {
+    pub id: Uuid,
+    pub boss_id: Option<Uuid>,
+    pub name: String,
 }
 
-impl Department::<Uuid> {
-   pub fn string_to_client(self) -> Department<String>{
-      let Department{id,boss_id,department_id,name} = self;
-      let id = id.to_string();
-      let boss_id = match boss_id {
-         Some(uuid) => Some(uuid.to_string()),
-         None       => None
-      };
-      let department_id = match department_id {
-         Some(uuid) => Some(uuid.to_string()),
-         None       => None
-      };
-      Department { id, boss_id, department_id, name }
-   }
+impl Wrapable for Department {
+    fn wrap(self) -> TableResponse {
+        TableResponse::Department(self)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum UpdateDepartment {
+    SetBoss(Uuid, Uuid),
+    ChangeBoss(Uuid),
+    UpdateName(Uuid, String),
 }

@@ -1,18 +1,22 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-#[derive(Serialize,Deserialize,FromRow)]
-pub struct SparePart<T: ToString>{
-  pub id         : T,
-  pub name       : String,
+use super::{TableResponse, Wrapable};
+
+#[derive(Serialize, Deserialize, FromRow)]
+pub struct SparePart {
+    pub id: Uuid,
+    pub name: String,
 }
 
-impl SparePart::<Uuid>{
-  pub fn string_to_client(self) -> SparePart<String>{
-    SparePart {
-      id: self.id.to_string(),
-      name: self.name
+impl Wrapable for SparePart {
+    fn wrap(self) -> TableResponse {
+        TableResponse::SparePart(self)
     }
-  }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum UpdateSparePart {
+    UpdateName(Uuid, String),
 }

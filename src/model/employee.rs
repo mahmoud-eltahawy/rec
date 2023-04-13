@@ -1,37 +1,34 @@
-use serde::{Serialize, Deserialize};
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
-#[derive(Serialize,Deserialize,Clone,FromRow,Debug)]
-pub struct Employee<T: ToString>{
-    pub id              : T,
-    pub department_id   : T,
-    pub position        : String,
-    pub first_name      : String,
-    pub middle_name     : String,
-    pub last_name       : String,
-    pub card_id         : i64,
-    pub password        : String
+use super::{permissions::PermissionName, TableResponse, Wrapable};
+
+#[derive(Serialize, Deserialize, Clone, FromRow, Debug)]
+pub struct Employee {
+    pub id: Uuid,
+    pub department_id: Uuid,
+    pub position: String,
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub card_id: i64,
+    pub password: String,
 }
 
-impl Employee::<Uuid>{
-  pub fn string_to_client(self) -> Employee<String>{
-    let Employee{card_id,department_id,first_name,id,last_name,middle_name,password,position} = self;
-    Employee {
-        id: id.to_string(),
-        department_id: department_id.to_string(),
-        position,
-        first_name,
-        middle_name,
-        last_name,
-        card_id,
-        password
+impl Wrapable for Employee {
+    fn wrap(self) -> TableResponse {
+        TableResponse::Employee(self)
     }
-  }
 }
 
-#[derive(Serialize,Deserialize)]
-pub struct Cred{
-  pub card_id : i16,
-  pub password: String
+#[derive(Serialize, Deserialize)]
+pub enum UpdateEmployee {
+    UpdatePassword(Uuid, String),
+    UpdateDepartment(Uuid, Uuid),
+    Up(Uuid),
+    Down(Uuid),
+    ForbidAllPermissions(Uuid),
+    ForbidPermission(Uuid, PermissionName),
+    AllowPermission(Uuid, PermissionName),
 }
